@@ -1,7 +1,11 @@
 /**
  * Logger utility using Pino
  *
- * Provides structured JSON logging with support for different log levels
+ * Provides structured JSON logging with support for different log levels.
+ * 
+ * IMPORTANT: All logs are written to stderr (file descriptor 2) to avoid
+ * breaking the MCP stdio communication stream. MCP uses stdout for protocol
+ * messages, so any application logs on stdout would corrupt the stream.
  */
 
 import pino from 'pino';
@@ -21,7 +25,14 @@ export interface ILoggerOptions {
 }
 
 /**
+ * Stderr destination for all logs
+ * Using file descriptor 2 ensures logs don't interfere with MCP stdio
+ */
+const stderrDestination = pino.destination(2);
+
+/**
  * Create a configured Pino logger instance
+ * All logs go to stderr to avoid breaking MCP stdio communication
  */
 export function createLogger(options: ILoggerOptions = {}): pino.Logger {
   const { level = 'info', name = 'gitflow-mcp', prettyPrint = false } = options;
@@ -55,6 +66,7 @@ export function createLogger(options: ILoggerOptions = {}): pino.Logger {
     },
   };
 
+  // When using pino-pretty, specify destination as stderr (fd 2)
   if (usePrettyPrint) {
     baseOptions.transport = {
       target: 'pino-pretty',
@@ -62,11 +74,15 @@ export function createLogger(options: ILoggerOptions = {}): pino.Logger {
         colorize: true,
         translateTime: 'SYS:standard',
         ignore: 'pid,hostname',
+        destination: 2, // stderr file descriptor
       },
     };
+    // When using transport, pino handles the destination internally
+    return pino(baseOptions);
   }
 
-  return pino(baseOptions);
+  // For JSON logging (production), explicitly use stderr destination
+  return pino(baseOptions, stderrDestination);
 }
 
 /**
