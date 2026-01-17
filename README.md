@@ -29,7 +29,7 @@ Works with all major AI coding assistants:
 | "I'm done, send for review" | Pushes your code and creates a PR link to share |
 | "What was I working on?" | Shows your recent work sessions |
 | "Go back to the pricing task" | Switches to your previous work |
-
+| "Jump" | We ask how high |
 ---
 
 ## 📋 Before You Start (Checklist)
