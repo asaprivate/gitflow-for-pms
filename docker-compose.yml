@@ -70,7 +70,7 @@ services:
       # Persist database data
       - pgdata:/var/lib/postgresql/data
       # Run initialization scripts on first startup
-      - ./src/db/migrations:/docker-entrypoint-initdb.d:ro
+      # - ./src/db/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gitflow -d gitflow_dev"]
       interval: 10s
