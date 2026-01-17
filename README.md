@@ -2,9 +2,20 @@
 
 ### Contribute to Code without the Headache
 
-GitFlow for PMs lets you make changes to your codebase using simple English. Just tell Claude what you want to do, and it handles all the Git complexity for you.
+GitFlow for PMs lets you make changes to your codebase using simple English. Just tell your AI assistant what you want to do, and it handles all the Git complexity for you.
 
 > **No terminal commands. No Git knowledge. Just describe what you want.**
+
+### 🎯 Designed for Vibe Coding Tools
+
+Works with all major AI coding assistants:
+
+| Tool | Status |
+|------|--------|
+| 🤖 **Claude Desktop** | ✅ Full Support |
+| ✏️ **Cursor** | ✅ Full Support |
+| 🔷 **Base44** | ✅ Full Support |
+| 🌐 **Other MCP Clients** | ✅ Standard MCP Protocol |
 
 ---
 
@@ -27,14 +38,18 @@ You'll need to download and install these tools. Don't worry—each one has a si
 
 | Tool | What It Does | Download Link |
 |------|--------------|---------------|
-| 🐳 **Docker Desktop** | Runs the database | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| 🐳 **Docker Desktop** OR **Rancher Desktop** | Runs the database | [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Rancher Desktop](https://rancherdesktop.io/) |
 | 💚 **Node.js** (v20+) | Runs the server | [Download Node.js](https://nodejs.org/) (choose "LTS") |
-| 🤖 **Claude Desktop** | Your AI assistant | [Download Claude Desktop](https://claude.ai/download) |
-| ✏️ **Cursor** (optional) | For editing code files | [Download Cursor](https://cursor.sh/) |
+| 🤖 **AI Coding Tool** (pick one) | Your AI assistant | [Claude Desktop](https://claude.ai/download), [Cursor](https://cursor.sh/), or [Base44](https://base44.com/) |
 
-### ⚠️ Important: Start Docker Desktop!
+### ⚠️ Important: Start Docker/Rancher!
 
-After installing Docker Desktop, **open the app and let it run in the background**. You'll see a whale icon in your menu bar when it's ready.
+After installing **Docker Desktop** or **Rancher Desktop**, **open the app and let it run in the background**.
+
+- **Docker Desktop:** Look for the whale 🐳 icon in your menu bar
+- **Rancher Desktop:** Look for the Rancher icon in your menu bar
+
+> **Note for Rancher users:** Rancher Desktop uses the same `docker compose` commands, so all instructions work the same way!
 
 ---
 
@@ -124,7 +139,7 @@ You need to create a GitHub OAuth App to connect your account:
 
 ### Step 7: Start the Database
 
-Make sure Docker Desktop is running, then:
+Make sure Docker Desktop (or Rancher Desktop) is running, then:
 
 ```bash
 docker compose up -d db redis
@@ -148,13 +163,25 @@ npm run migrate
 npm run build
 ```
 
-🎉 **Installation complete!** Now let's connect it to Claude.
+🎉 **Installation complete!** Now let's connect it to your AI coding tool.
 
 ---
 
-## 🤖 Connecting to Claude Desktop
+## 🔌 Connecting to Your AI Tool
 
-### Step 1: Find Your Claude Config File
+Choose your AI coding tool below and follow the instructions.
+
+> **💡 Tip:** Before configuring, find your project path by running `pwd` in your terminal (while in the project folder). You'll need this path below.
+>
+> **Example paths:**
+> - Mac: `/Users/yourname/gitflow-for-pms`
+> - Windows: `C:\Users\yourname\gitflow-for-pms`
+
+---
+
+### 🤖 Option A: Claude Desktop
+
+#### Step 1: Find Your Claude Config File
 
 **On Mac:**
 ```bash
@@ -166,7 +193,7 @@ open ~/Library/Application\ Support/Claude/
 %APPDATA%\Claude\
 ```
 
-### Step 2: Edit `claude_desktop_config.json`
+#### Step 2: Edit `claude_desktop_config.json`
 
 If the file doesn't exist, create it. Add this configuration:
 
@@ -190,24 +217,13 @@ If the file doesn't exist, create it. Add this configuration:
 }
 ```
 
-⚠️ **Important:** Replace `/FULL/PATH/TO/gitflow-for-pms` with the actual path to where you downloaded the project.
+⚠️ **Important:** Replace `/FULL/PATH/TO/gitflow-for-pms` with your actual project path.
 
-**To find your full path:**
-- In your terminal, navigate to the project folder and run:
-  ```bash
-  pwd
-  ```
-- Copy the output and use it in the config
-
-**Example paths:**
-- Mac: `/Users/yourname/gitflow-for-pms/dist/index.js`
-- Windows: `C:\\Users\\yourname\\gitflow-for-pms\\dist\\index.js`
-
-### Step 3: Restart Claude Desktop
+#### Step 3: Restart Claude Desktop
 
 Completely quit Claude Desktop and reopen it. The GitFlow tools should now be available!
 
-### Step 4: Verify It's Working
+#### Step 4: Verify It's Working
 
 In Claude, try asking:
 
@@ -217,9 +233,95 @@ Claude should list the tools like `list_repositories`, `save_changes`, `push_for
 
 ---
 
+### ✏️ Option B: Cursor
+
+#### Step 1: Open Cursor Settings
+
+1. Open **Cursor**
+2. Go to **Settings** (⌘ + , on Mac, Ctrl + , on Windows)
+3. Navigate to **Features** → **MCP**
+
+#### Step 2: Add the MCP Server
+
+1. Click **"+ Add New MCP Server"**
+2. Fill in the fields:
+
+| Field | Value |
+|-------|-------|
+| **Name** | `gitflow` |
+| **Type** | `stdio` |
+| **Command** | `node` |
+| **Args** | `/FULL/PATH/TO/gitflow-for-pms/dist/index.js` |
+
+⚠️ **Important:** Replace `/FULL/PATH/TO/gitflow-for-pms` with your actual project path.
+
+#### Step 3: Add Environment Variables
+
+In the same MCP configuration, add these environment variables:
+
+| Variable | Value |
+|----------|-------|
+| `NODE_ENV` | `development` |
+| `DATABASE_URL` | `postgresql://gitflow:gitflow_secret@localhost:5432/gitflow_dev` |
+| `REDIS_URL` | `redis://localhost:6379` |
+| `GITHUB_CLIENT_ID` | Your GitHub Client ID |
+| `GITHUB_CLIENT_SECRET` | Your GitHub Client Secret |
+| `GITHUB_REDIRECT_URI` | `http://localhost:3000/oauth/callback` |
+| `JWT_SECRET` | `your-super-secret-jwt-key-change-in-production` |
+
+> **Alternative:** If Cursor supports loading from a `.env` file, you can skip adding individual variables—just make sure your `.env` file is properly configured.
+
+#### Step 4: Restart Cursor
+
+Close and reopen Cursor. The GitFlow tools should now be available in your AI chat!
+
+---
+
+### 🔷 Option C: Base44
+
+Base44 follows the standard MCP protocol configuration.
+
+#### Step 1: Open MCP Settings
+
+In Base44, navigate to your MCP server configuration (usually in Settings or Preferences).
+
+#### Step 2: Add Server Configuration
+
+Add a new MCP server with these settings:
+
+| Setting | Value |
+|---------|-------|
+| **Transport** | `stdio` |
+| **Command** | `node` |
+| **Arguments** | `/FULL/PATH/TO/gitflow-for-pms/dist/index.js` |
+
+#### Step 3: Configure Environment Variables
+
+Add the same environment variables listed in the Cursor section above, or ensure your `.env` file is loaded.
+
+#### Step 4: Restart Base44
+
+Restart the application to activate the GitFlow tools.
+
+---
+
+### 🌐 Option D: Other MCP-Compatible Tools
+
+GitFlow for PMs uses the standard **Model Context Protocol (MCP)** with `stdio` transport.
+
+**Configuration details:**
+- **Transport:** `stdio`
+- **Command:** `node`
+- **Arguments:** `["/path/to/gitflow-for-pms/dist/index.js"]`
+- **Environment variables:** See the table in the Cursor section above
+
+Refer to your tool's documentation for how to add MCP servers.
+
+---
+
 ## 📖 How to Use (Cheat Sheet)
 
-Once connected, just talk to Claude naturally. Here are some example prompts:
+Once connected, just talk to your AI assistant naturally. Here are some example prompts:
 
 ### 🚀 Getting Started
 
@@ -257,7 +359,7 @@ Once connected, just talk to Claude naturally. Here are some example prompts:
 
 1. **Save frequently** — Every save is a checkpoint you can return to
 2. **Describe your work** — "Save changes: Added new pricing tier" helps track what you did
-3. **Ask for help** — Claude can explain what's happening in simple terms
+3. **Ask for help** — Your AI assistant can explain what's happening in simple terms
 4. **Don't worry about branches** — The tool handles that automatically
 
 ---
@@ -269,7 +371,9 @@ Once connected, just talk to Claude naturally. Here are some example prompts:
 **Problem:** The database isn't running.
 
 **Solution:**
-1. Make sure Docker Desktop is open and running (look for the whale icon)
+1. Make sure **Docker Desktop** or **Rancher Desktop** is open and running
+   - Docker: Look for the whale 🐳 icon in your menu bar
+   - Rancher: Look for the Rancher icon in your menu bar
 2. Run this command:
    ```bash
    docker compose up -d db redis
@@ -281,21 +385,30 @@ Once connected, just talk to Claude naturally. Here are some example prompts:
 **Problem:** Your GitHub credentials are wrong or missing.
 
 **Solution:**
-1. Check your `.env` file has the correct `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`
+1. Check your `.env` file (or MCP config) has the correct `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`
 2. Make sure you copied them correctly from [GitHub Developer Settings](https://github.com/settings/developers)
 3. Rebuild the project:
    ```bash
    npm run build
    ```
 
-### ❌ "MCP server not found" in Claude
+### ❌ "MCP server not found"
 
-**Problem:** Claude can't find the GitFlow server.
+**Problem:** Your AI tool can't find the GitFlow server.
 
 **Solution:**
-1. Check the path in `claude_desktop_config.json` is correct
+1. Check that the path to `dist/index.js` is correct in your configuration
 2. Make sure you ran `npm run build` after installation
-3. Completely quit and restart Claude Desktop
+3. Completely quit and restart your AI tool (Claude, Cursor, or Base44)
+
+### ❌ "Command not found: node"
+
+**Problem:** Node.js isn't installed or isn't in your PATH.
+
+**Solution:**
+1. Install Node.js from [nodejs.org](https://nodejs.org/) (choose "LTS")
+2. Restart your terminal
+3. Verify by running: `node --version`
 
 ### ❌ "Permission denied" errors
 
@@ -317,6 +430,7 @@ Once connected, just talk to Claude naturally. Here are some example prompts:
    npm run migrate
    npm run build
    ```
+3. Restart your AI tool completely
 
 ---
 
@@ -339,7 +453,7 @@ Once connected, just talk to Claude naturally. Here are some example prompts:
 
 ### What if I make a mistake?
 
-You can always go back to a previous save. Just tell Claude "What changes have I made?" and work from there.
+You can always go back to a previous save. Just ask "What changes have I made?" and work from there.
 
 ### Do engineers need to change their workflow?
 
