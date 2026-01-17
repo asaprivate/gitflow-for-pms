@@ -1,0 +1,88 @@
+# =============================================================================
+# Docker Ignore - GitFlow MCP Server
+# =============================================================================
+# Exclude files and directories from Docker build context
+# Reduces build time and image size
+# =============================================================================
+
+# Dependencies (will be installed in container)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output (will be built in container)
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files (secrets should not be in image)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Git
+.git/
+.gitignore
+
+# IDE and editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Documentation (not needed in runtime)
+docs/
+*.md
+!README.md
+
+# Docker files (prevent recursive inclusion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+Jenkinsfile
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Development tools
+.eslintcache
+.prettierignore
+.editorconfig
+jest.config.js
+jest.setup.js
+nodemon.json
+tsconfig.json
+
+# Local development
+.local/
+*.local.ts
+*.local.js
+
+# Cloned repositories (development only)
+.gitflow-pm/

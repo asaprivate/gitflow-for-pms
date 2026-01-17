@@ -1,0 +1,144 @@
+# =============================================================================
+# GitFlow MCP Server - Docker Compose Configuration
+# =============================================================================
+# Local development environment with PostgreSQL and Redis
+#
+# Usage:
+#   Start:   docker-compose up -d
+#   Stop:    docker-compose down
+#   Logs:    docker-compose logs -f
+#   Rebuild: docker-compose up -d --build
+#   Reset:   docker-compose down -v (removes volumes)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application Service
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development (includes devDeps)
+    container_name: gitflow-mcp-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - PORT=3000
+      - DATABASE_URL=postgresql://gitflow:gitflow_secret@db:5432/gitflow_dev
+      - REDIS_URL=redis://redis:6379
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-dev_client_id}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-dev_client_secret}
+      - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI:-http://localhost:3000/oauth/callback}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_xxx}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_xxx}
+      - STRIPE_PRO_PRICE_ID=${STRIPE_PRO_PRICE_ID:-price_xxx}
+    volumes:
+      # Mount source for development (hot reload with build:watch)
+      - ./src:/app/src:ro
+      - ./dist:/app/dist
+      # Persist cloned repositories
+      - gitflow-repos:/home/gitflow/.gitflow-pm
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gitflow-network
+    command: ["npm", "run", "dev"]
+    # For production, use: command: ["npm", "start"]
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: gitflow-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: gitflow
+      POSTGRES_PASSWORD: gitflow_secret
+      POSTGRES_DB: gitflow_dev
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Persist database data
+      - pgdata:/var/lib/postgresql/data
+      # Run initialization scripts on first startup
+      - ./src/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gitflow -d gitflow_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - gitflow-network
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: gitflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - gitflow-network
+
+  # ---------------------------------------------------------------------------
+  # Database Admin UI (Optional - for development)
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: gitflow-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gitflow.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - gitflow-network
+    profiles:
+      - dev-tools  # Only start with: docker-compose --profile dev-tools up
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  gitflow-repos:
+    driver: local
+  pgadmin-data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  gitflow-network:
+    driver: bridge
