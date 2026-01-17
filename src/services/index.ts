@@ -74,6 +74,13 @@ export type {
   ITranslatedError,
 } from './ErrorTranslator.js';
 
+export {
+  OAuthCallbackServer,
+  getOAuthCallbackServer,
+  startOAuthCallbackServer,
+  stopOAuthCallbackServer,
+} from './OAuthCallbackServer.js';
+
 // export { LicenseService } from './LicenseService.js';
 // export { FileWatcherService } from './FileWatcherService.js';
 // export { SessionService } from './SessionService.js';

@@ -15,6 +15,7 @@ import { createMCPServer, startMCPServer, shutdownMCPServer } from './mcp/index.
 import { initializeDatabase, closePool } from './db/index.js';
 import { logger, createChildLogger } from './utils/logger.js';
 import { getConfig } from './config/index.js';
+import { startOAuthCallbackServer, stopOAuthCallbackServer } from './services/OAuthCallbackServer.js';
 
 /**
  * Application metadata
@@ -34,6 +35,9 @@ async function handleShutdown(signal: string, server: ReturnType<typeof createMC
   mainLogger.info({ signal }, 'Received shutdown signal');
 
   try {
+    // Shutdown OAuth callback server
+    await stopOAuthCallbackServer();
+
     // Shutdown MCP server
     await shutdownMCPServer(server);
 
@@ -65,6 +69,11 @@ async function main(): Promise<void> {
     // Initialize database connection
     mainLogger.info('Initializing database connection...');
     await initializeDatabase();
+
+    // Start OAuth callback HTTP server (for GitHub OAuth flow)
+    mainLogger.info('Starting OAuth callback server...');
+    const oauthServer = await startOAuthCallbackServer();
+    mainLogger.info({ port: oauthServer.getPort() }, 'OAuth callback server ready');
 
     // Create MCP server
     mainLogger.info('Creating MCP server...');
@@ -100,6 +109,7 @@ async function main(): Promise<void> {
 
     mainLogger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     mainLogger.info('  ✓ GitFlow MCP Server is ready!');
+    mainLogger.info(`  ✓ OAuth callback server on port ${oauthServer.getPort()}`);
     mainLogger.info('  ✓ Connect your AI IDE to start using GitFlow');
     mainLogger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   } catch (error) {
