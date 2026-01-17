@@ -68,7 +68,7 @@ After installing **Docker Desktop** or **Rancher Desktop**, **open the app and l
 Copy and paste this command, then press Enter:
 
 ```bash
-git clone https://github.com/gitflow-for-pms/gitflow-for-pms.git
+git clone git clone https://github.com/asaprivate/gitflow-for-pms.git
 cd gitflow-for-pms
 ```
 
