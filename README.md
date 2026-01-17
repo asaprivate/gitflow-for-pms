@@ -236,47 +236,64 @@ Claude should list the tools like `list_repositories`, `save_changes`, `push_for
 
 ### ✏️ Option B: Cursor
 
+Cursor uses a JSON configuration file for MCP servers, similar to Claude Desktop.
+
 #### Step 1: Open MCP Settings
 
 1. Open **Cursor**
 2. Press **⌘ + ,** (Mac) or **Ctrl + ,** (Windows) to open Settings
 3. Click **"Tools & MCP"** in the left sidebar
 
-#### Step 2: Add the GitFlow Server
+#### Step 2: Open the Config File
 
-1. Click **"+ Add New MCP Server"**
-2. Fill in the fields:
+1. Click **"+ New MCP Server"**
+2. This will open the `mcp.json` configuration file in your editor
 
+> 💡 **Config file location:** Usually at `~/.cursor/mcp.json`
+
+#### Step 3: Add the GitFlow Configuration
+
+Paste the following inside the `"mcpServers"` object:
+
+```json
+"gitflow": {
+  "command": "node",
+  "args": ["/ABSOLUTE/PATH/TO/gitflow-for-pms/dist/index.js"],
+  "env": {
+    "NODE_ENV": "development",
+    "DATABASE_URL": "postgresql://gitflow:gitflow_secret@localhost:5432/gitflow_dev",
+    "REDIS_URL": "redis://localhost:6379",
+    "GITHUB_CLIENT_ID": "your_client_id_here",
+    "GITHUB_CLIENT_SECRET": "your_client_secret_here",
+    "GITHUB_REDIRECT_URI": "http://localhost:3000/oauth/callback",
+    "JWT_SECRET": "your-super-secret-jwt-key-change-in-production"
+  }
+}
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Add MCP Server                                         │
-├─────────────────────────────────────────────────────────┤
-│  Name:     gitflow                                      │
-│  Type:     stdio                                        │
-│  Command:  node                                         │
-│  Args:     /YOUR/PATH/TO/gitflow-for-pms/dist/index.js  │
-└─────────────────────────────────────────────────────────┘
-```
 
-3. Click **Save**
+⚠️ **Important:** 
+- Replace `/ABSOLUTE/PATH/TO/gitflow-for-pms` with your actual project path
+- Replace `your_client_id_here` and `your_client_secret_here` with your GitHub OAuth credentials
+- If you have other MCP servers already configured, add a comma before this block
 
-> 💡 **To find your path:** In your terminal, navigate to the project folder and run `pwd`. Copy that path and add `/dist/index.js` to the end.
+> 💡 **To find your path:** In your terminal, navigate to the project folder and run `pwd`. 
 >
 > **Example:** `/Users/yourname/gitflow-for-pms/dist/index.js`
 
-#### Step 3: Verify the Connection
+#### Step 4: Save and Restart
 
-Look for the **green status indicator** 🟢 next to your GitFlow server in the MCP list.
+1. Save the `mcp.json` file
+2. Restart Cursor completely (quit and reopen)
+
+#### Step 5: Verify the Connection
+
+Look for the **green status indicator** 🟢 next to "gitflow" in the MCP list.
 
 | Status | Meaning |
 |--------|---------|
 | 🟢 Green | Connected and working! |
-| 🔴 Red | Something's wrong (check the path) |
+| 🔴 Red | Something's wrong (check path and env vars) |
 | ⚪ Gray | Not started yet (restart Cursor) |
-
-#### That's It! 🎉
-
-**No environment variables needed in Cursor!** Our code automatically loads your `.env` file, so as long as you completed Step 5 of the installation (creating the `.env` file), everything will work.
 
 > **If you see connection errors:** Make sure Docker/Rancher is running and the database is started (`docker compose up -d db redis`).
 
