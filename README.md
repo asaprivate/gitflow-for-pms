@@ -236,45 +236,49 @@ Claude should list the tools like `list_repositories`, `save_changes`, `push_for
 
 ### ✏️ Option B: Cursor
 
-#### Step 1: Open Cursor Settings
+#### Step 1: Open MCP Settings
 
 1. Open **Cursor**
-2. Go to **Settings** (⌘ + , on Mac, Ctrl + , on Windows)
-3. Navigate to **Features** → **MCP**
+2. Press **⌘ + ,** (Mac) or **Ctrl + ,** (Windows) to open Settings
+3. Click **"Tools & MCP"** in the left sidebar
 
-#### Step 2: Add the MCP Server
+#### Step 2: Add the GitFlow Server
 
 1. Click **"+ Add New MCP Server"**
 2. Fill in the fields:
 
-| Field | Value |
-|-------|-------|
-| **Name** | `gitflow` |
-| **Type** | `stdio` |
-| **Command** | `node` |
-| **Args** | `/FULL/PATH/TO/gitflow-for-pms/dist/index.js` |
+```
+┌─────────────────────────────────────────────────────────┐
+│  Add MCP Server                                         │
+├─────────────────────────────────────────────────────────┤
+│  Name:     gitflow                                      │
+│  Type:     stdio                                        │
+│  Command:  node                                         │
+│  Args:     /YOUR/PATH/TO/gitflow-for-pms/dist/index.js  │
+└─────────────────────────────────────────────────────────┘
+```
 
-⚠️ **Important:** Replace `/FULL/PATH/TO/gitflow-for-pms` with your actual project path.
+3. Click **Save**
 
-#### Step 3: Add Environment Variables
+> 💡 **To find your path:** In your terminal, navigate to the project folder and run `pwd`. Copy that path and add `/dist/index.js` to the end.
+>
+> **Example:** `/Users/yourname/gitflow-for-pms/dist/index.js`
 
-In the same MCP configuration, add these environment variables:
+#### Step 3: Verify the Connection
 
-| Variable | Value |
-|----------|-------|
-| `NODE_ENV` | `development` |
-| `DATABASE_URL` | `postgresql://gitflow:gitflow_secret@localhost:5432/gitflow_dev` |
-| `REDIS_URL` | `redis://localhost:6379` |
-| `GITHUB_CLIENT_ID` | Your GitHub Client ID |
-| `GITHUB_CLIENT_SECRET` | Your GitHub Client Secret |
-| `GITHUB_REDIRECT_URI` | `http://localhost:3000/oauth/callback` |
-| `JWT_SECRET` | `your-super-secret-jwt-key-change-in-production` |
+Look for the **green status indicator** 🟢 next to your GitFlow server in the MCP list.
 
-> **Alternative:** If Cursor supports loading from a `.env` file, you can skip adding individual variables—just make sure your `.env` file is properly configured.
+| Status | Meaning |
+|--------|---------|
+| 🟢 Green | Connected and working! |
+| 🔴 Red | Something's wrong (check the path) |
+| ⚪ Gray | Not started yet (restart Cursor) |
 
-#### Step 4: Restart Cursor
+#### That's It! 🎉
 
-Close and reopen Cursor. The GitFlow tools should now be available in your AI chat!
+**No environment variables needed in Cursor!** Our code automatically loads your `.env` file, so as long as you completed Step 5 of the installation (creating the `.env` file), everything will work.
+
+> **If you see connection errors:** Make sure Docker/Rancher is running and the database is started (`docker compose up -d db redis`).
 
 ---
 
