@@ -87,6 +87,7 @@ cp .env.example .env
 > **Note:** If `.env.example` doesn't exist, create a new file called `.env` and add the contents from the next section.
 
 ### Step 5: Configure Your `.env` File
+Tip for Mac Users: If you don't see the .env file in Finder, press Cmd + Shift + . (period) to reveal hidden files.
 
 Open the `.env` file in any text editor and add these settings:
 
